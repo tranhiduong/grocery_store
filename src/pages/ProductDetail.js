@@ -29,7 +29,7 @@ const ProductDetail = () => {
   const addToCart = (product) => {
     dispatch({
       type: 'ADD_ITEM',
-      payload: { ...product, quantity: 1 } // Default quantity to 1
+      payload: { ...product, quantity: quantity } // Default quantity to 1
     });
     setNotification(`Added "${product.productName}" to Cart`); // Set the notification message
     setTimeout(() => setNotification(null), 2000); // Clear the notification after 3 seconds

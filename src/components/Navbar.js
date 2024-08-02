@@ -1,14 +1,22 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FaUser, FaShoppingCart, FaSearch } from 'react-icons/fa';
 import { useCart } from '../contexts/CartContext';
+import { useAuth } from '../contexts/AuthContext';
 import Cart from '../components/Cart';
 
 const Navbar = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const { cart } = useCart();
+  const { currentUser, signOut } = useAuth();
   const cartItemCount = cart.reduce((count, item) => count + item.quantity, 0);
-  
+  const navigate = useNavigate();
+
+  const handleSignOut = () => {
+    signOut();
+    navigate('/signin');
+  };
+
   return (
     <>
       <nav className="bg-gray-800">
@@ -29,13 +37,9 @@ const Navbar = () => {
               </div>
             </div>
           </div>
-          <div className="flex items-center">
-            <Link to="/signin" className="flex items-center mr-4 text-white">
-              <FaUser className="text-2xl" />
-              <span className="ml-1 text-sm">Sign In</span>
-            </Link>
+          <div className="flex items-center">           
             <div
-              className="flex items-center relative text-white cursor-pointer"
+              className="flex items-center relative text-white cursor-pointer mr-2"
               onClick={() => setIsCartOpen(true)}
             >
               <FaShoppingCart className="text-2xl" />
@@ -46,6 +50,17 @@ const Navbar = () => {
               </div>
               <span className="ml-1 text-sm">Cart</span>
             </div>
+            {currentUser ? (
+              <div className="flex items-center relative text-white cursor-pointer">
+                <FaUser className="text-2xl" />
+                <span className="ml-1 text-sm" onClick={handleSignOut}>Sign Out</span>
+              </div>
+            ) : (
+              <Link to="/signin" className="flex items-center mr-4 text-white">
+                <FaUser className="text-2xl" />
+                <span className="ml-1 text-sm">Sign In</span>
+              </Link>
+            )}
           </div>
         </div>
       </nav>
