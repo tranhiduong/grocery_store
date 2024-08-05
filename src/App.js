@@ -10,7 +10,8 @@ import ProductDetail from './pages/ProductDetail';
 import Checkout from './pages/Checkout';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
-import ManageAccount from './pages/ManageAccount';
+import Account from './pages/Account';
+import OrderDetail from './pages/OrderDetail';
 
 import { CartProvider } from './contexts/CartContext';
 import { AuthProvider } from './contexts/AuthContext';
@@ -30,7 +31,8 @@ function App() {
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/signin" element={<SignIn />} />
                 <Route path="/signup" element={<SignUp />} />
-                <Route path="/manage-account" element={<ManageAccount />} />
+                <Route path="/account" element={<Account />} />
+                <Route path="/order/:orderId" element={<OrderDetail />} />
               </Routes>
             </div>
           </BrowserRouter>
