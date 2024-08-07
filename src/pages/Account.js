@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import AccountInformation from '../components/AccountInformation';
 import OrderList from '../components/OrderList';
 
-const Account = ({ selectTab }) => {
+const Account = () => {
   const [selectedTab, setSelectedTab] = useState('accountInfo');
 
   return (

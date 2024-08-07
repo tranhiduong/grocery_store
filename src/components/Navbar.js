@@ -1,20 +1,68 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaUser, FaShoppingCart, FaSearch, FaSignOutAlt } from 'react-icons/fa';
+import { FaUser, FaShoppingCart, FaSearch, FaSignOutAlt, FaCaretDown, FaCaretRight } from 'react-icons/fa';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import Cart from '../components/Cart';
 
 const Navbar = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [subCategories, setSubCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const { cart } = useCart();
   const { currentUser, signOut } = useAuth();
   const cartItemCount = cart.reduce((count, item) => count + item.quantity, 0);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    // Fetch categories and subcategories
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('https://sugartran.000webhostapp.com/api/CategoriesResponse.json');
+        const data = await response.json();
+        setCategories(data.data);
+        setSelectedCategory(data.data[0]); // Set default selected category
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+
+    const fetchSubCategories = async () => {
+      try {
+        const response = await fetch('https://sugartran.000webhostapp.com/api/SubCategoriesResponse.json');
+        const data = await response.json();
+        setSubCategories(data.data);
+      } catch (error) {
+        console.error('Error fetching subcategories:', error);
+      }
+    };
+
+    fetchCategories();
+    fetchSubCategories();
+  }, []);
+
   const handleSignOut = () => {
     signOut();
     navigate('/signin');
+  };
+
+  const getSubCategoriesForSelectedCategory = () => {
+    if (!selectedCategory) return [];
+    return subCategories.filter(subCategory => subCategory.idCategory === selectedCategory.idCategory);
+  };
+
+  const handleCategoryClick = (category) => {
+    setSelectedCategory(category);
+  };
+
+  const handleSubCategoryClick = (subcategory) => {
+    navigate(`/shop?subcategoryId=${subcategory.idSubCategory}`);
+  };
+
+  const handleAllClick = () => {
+    navigate('/shop');
   };
 
   return (
@@ -24,7 +72,7 @@ const Navbar = () => {
           <div className="flex items-center">
             <img src="/logo.png" alt="Logo" className="h-8 mr-2" />
           </div>
-          <div className="flex items-center justify-center w-3/5">
+          <div className="flex items-center w-full md:w-3/5">
             <div className="relative w-full">
               <input
                 type="text"
@@ -67,6 +115,22 @@ const Navbar = () => {
           </div>
         </div>
       </nav>
+
+      <div className="relative bg-white border-t border-gray-200">
+        <div className="mx-auto min-w-[375px] max-w-[1600px] flex items-start p-4 h-20">
+          <div className="relative">
+            <Link to="/shop">
+              <button
+                className="btn btn-primary text-white px-4 py-2 rounded-md"
+              >
+                Shop
+              </button>
+            </Link>
+            
+          </div>
+        </div>
+      </div>
+
       {isCartOpen && <Cart isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />}
     </>
   );

@@ -23,7 +23,6 @@ function App() {
         <AuthProvider>
           <BrowserRouter>
             <Navbar />
-            <div className="pages mt-6">
               <Routes>
                 <Route path="/" element={<Shop />} />
                 <Route path="/shop" element={<Shop />} />
@@ -34,7 +33,6 @@ function App() {
                 <Route path="/account" element={<Account />} />
                 <Route path="/order/:orderId" element={<OrderDetail />} />
               </Routes>
-            </div>
           </BrowserRouter>
         </AuthProvider>
       </CartProvider>

@@ -24,9 +24,6 @@ const SignIn = () => {
 
   return (
     <div className="relative items-center justify-center mx-auto min-w-[375px] max-w-[1600px] h-[calc(100vh-72px-1.5rem)]">
-      <Link to="/shop" className="absolute top-4 left-4 btn btn-neutral">
-        Go back to shop
-      </Link>
       <div className="mx-auto w-full max-w-md p-8 space-y-6 bg-white border rounded shadow-md">
         <h2 className="text-2xl font-bold text-center">Sign In</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
