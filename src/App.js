@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import Shop from './pages/Shop';
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import ProductDetail from './pages/ProductDetail';
 import Checkout from './pages/Checkout';
 import SignIn from './pages/SignIn';
@@ -23,7 +24,8 @@ function App() {
         <AuthProvider>
           <BrowserRouter>
             <Navbar />
-              <Routes>
+            <div className='min-h-[calc(100vh-72px-1.5rem)]'>
+            <Routes>
                 <Route path="/" element={<Shop />} />
                 <Route path="/shop" element={<Shop />} />
                 <Route path="/product/:productId" element={<ProductDetail />} />
@@ -33,6 +35,8 @@ function App() {
                 <Route path="/account" element={<Account />} />
                 <Route path="/order/:orderId" element={<OrderDetail />} />
               </Routes>
+            </div> 
+            <Footer />
           </BrowserRouter>
         </AuthProvider>
       </CartProvider>
