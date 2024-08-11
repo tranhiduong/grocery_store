@@ -70,7 +70,7 @@ const Cart = ({ isOpen, onClose }) => {
                 />
                 <div className="flex-grow">
                   <h3 className="text-lg font-semibold">{item.productName}</h3>
-                  <p className="text-gray-600 mb-2">${item.productPrice}</p>
+                  <p className="text-gray-600 mb-2">{item.productPrice} VND</p>
                   <div className="flex items-center space-x-2">
                     <QuantityPicker
                       value={item.quantity}
@@ -91,7 +91,7 @@ const Cart = ({ isOpen, onClose }) => {
       </div>
       <div className="p-4 border-t flex justify-between items-center">
         <div>
-          <p className="font-semibold">Total Price: ${getTotalPrice().toFixed(2)}</p>
+          <p className="font-semibold">Total Price: {getTotalPrice()} VND</p>
           <p className="text-gray-600">Total Items: {getTotalItems()}</p>
         </div>
         <Link to="/checkout" onClick={handleCheckout}>

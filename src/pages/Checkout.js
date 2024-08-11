@@ -1,33 +1,82 @@
 import React, { useState } from 'react';
 import { useCart } from '../contexts/CartContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Checkout = () => {
-  const { cart } = useCart();
+  const { cart, clearCart } = useCart(); // Assuming clearCart is available to clear the cart after order placement
+  const navigate = useNavigate();
+  
+  const getTotalPrice = () => {
+    return cart.reduce((total, item) => total + item.productPrice * item.quantity, 0);
+  };
+
+  const shippingFee = 10000; // Example shipping fee
+  const totalPriceWithShipping = getTotalPrice() + shippingFee;
+
   const [formData, setFormData] = useState({
-    name: '',
-    address: '',
-    phone: '',
-    email: '',
-    paymentMethod: 'creditCard'
+    idUser: 0,
+    statusCode: 'processing',
+    statusName: 'processing',
+    orderName: '',
+    orderEmail: '',
+    orderPhoneNumber: '',
+    orderAddress: '',
+    orderNote: '',
+    orderDate: new Date().toISOString(),
+    orderTotalPrice: totalPriceWithShipping,
+    orderShippingMethod: 'GHN',
+    orderShippingDate: new Date().toISOString(),
+    orderTrackingNumber: '123',
+    orderPaymentMethod: 'CreditCard',
+    orderPaymentStatus: 'AwaitingPayment',
   });
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isOrderSuccess, setIsOrderSuccess] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission logic here
+
+    const payload = {
+      ...formData
+    };
+
+    try {
+      const response = await fetch('https://testdeploy.up.railway.app/api/v1/order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to place order');
+      }
+
+      const result = await response.json();
+      console.log('Order placed successfully:', result);
+      setIsOrderSuccess(true);
+      clearCart(); // Clear the cart after successful order
+    } catch (error) {
+      console.error('Error placing order:', error);
+      setIsOrderSuccess(false);
+    } finally {
+      setIsModalOpen(true);
+    }
   };
 
-  const getTotalPrice = () => {
-    return cart.reduce((total, item) => total + item.productPrice * item.quantity, 0);
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    if (isOrderSuccess) {
+      navigate('/shop'); // Redirect to shop page after successful order
+    }
   };
-
-  const shippingFee = 10; // Example shipping fee
-  const totalPriceWithShipping = getTotalPrice() + shippingFee;
 
   if (cart.length === 0) {
     return (
@@ -50,8 +99,8 @@ const Checkout = () => {
             <label className="block text-gray-700">Name*</label>
             <input
               type="text"
-              name="name"
-              value={formData.name}
+              name="orderName"
+              value={formData.orderName}
               onChange={handleChange}
               required
               className="w-full p-2 border rounded"
@@ -61,8 +110,8 @@ const Checkout = () => {
             <label className="block text-gray-700">Address*</label>
             <input
               type="text"
-              name="address"
-              value={formData.address}
+              name="orderAddress"
+              value={formData.orderAddress}
               onChange={handleChange}
               required
               className="w-full p-2 border rounded"
@@ -72,8 +121,8 @@ const Checkout = () => {
             <label className="block text-gray-700">Phone*</label>
             <input
               type="tel"
-              name="phone"
-              value={formData.phone}
+              name="orderPhoneNumber"
+              value={formData.orderPhoneNumber}
               onChange={handleChange}
               required
               className="w-full p-2 border rounded"
@@ -83,24 +132,45 @@ const Checkout = () => {
             <label className="block text-gray-700">Email*</label>
             <input
               type="email"
-              name="email"
-              value={formData.email}
+              name="orderEmail"
+              value={formData.orderEmail}
               onChange={handleChange}
               required
               className="w-full p-2 border rounded"
             />
           </div>
           <div>
-            <label className="block text-gray-700">Payment Method</label>
+            <label className="block text-gray-700">Note</label>
+            <input
+              type="text"
+              name="orderNote"
+              value={formData.orderNote}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700">Shipping Method</label>
             <select
-              name="paymentMethod"
-              value={formData.paymentMethod}
+              name="orderShippingMethod"
+              value={formData.orderShippingMethod}
               onChange={handleChange}
               className="w-full p-2 border rounded"
             >
-              <option value="creditCard">Credit Card</option>
-              <option value="paypal">PayPal</option>
-              <option value="bankTransfer">Bank Transfer</option>
+              <option value="GHN">GHN</option>
+              <option value="GHTK">GHTK</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-gray-700">Payment Method</label>
+            <select
+              name="orderPaymentMethod"
+              value={formData.orderPaymentMethod}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+            >
+              <option value="CreditCard">Credit Card</option>
+              <option value="Cash">Cash</option>
             </select>
           </div>
           <div className="flex justify-between">
@@ -123,7 +193,7 @@ const Checkout = () => {
               <div>
                 <h3 className="text-lg font-semibold">{item.productName}</h3>
                 <p className="text-gray-600">
-                  ${item.productPrice} x {item.quantity}
+                  {item.productPrice} VND x {item.quantity}
                 </p>
               </div>
               <img
@@ -136,16 +206,40 @@ const Checkout = () => {
         </ul>
         <div className="border-t mt-4 pt-4">
           <p className="text-lg">
-            <span className="font-semibold">Subtotal:</span> ${getTotalPrice().toFixed(2)}
+            <span className="font-semibold">Subtotal:</span> {getTotalPrice()} VND
           </p>
           <p className="text-lg">
-            <span className="font-semibold">Shipping Fee:</span> ${shippingFee.toFixed(2)}
+            <span className="font-semibold">Shipping Fee:</span> {shippingFee} VND
           </p>
           <p className="text-xl font-semibold mt-2">
-            <span>Total:</span> ${totalPriceWithShipping.toFixed(2)}
+            <span>Total:</span> {totalPriceWithShipping} VND
           </p>
         </div>
       </div>
+
+      {/* Modal */}
+      {isModalOpen && (
+        <div className="modal modal-open">
+          <div className="modal-box">
+            <h3 className="font-bold text-lg">
+              {isOrderSuccess ? 'Order Success' : 'Order Failed'}
+            </h3>
+            <p className="py-4">
+              {isOrderSuccess
+                ? 'Your order has been placed successfully!'
+                : 'There was an error placing your order. Please try again.'}
+            </p>
+            <div className="modal-action">
+              <button
+                onClick={handleModalClose}
+                className="btn btn-primary"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

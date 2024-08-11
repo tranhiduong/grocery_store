@@ -14,40 +14,46 @@ const Shop = () => {
   const [subCategories, setSubCategories] = useState([]);
   const [notification, setNotification] = useState(null); // State for managing notifications
   const { dispatch } = useCart();
+  const [currentPage, setCurrentPage] = useState(0); // Tracks the current page
+  const [totalProducts, setTotalProducts] = useState(0); 
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await fetch('https://sugartran.000webhostapp.com/api/CategoriesResponse.json');
-        const data = await response.json();
-        setCategories(data.data);
-      } catch (error) {
-        console.error('Error fetching categories:', error);
-      }
-    };
 
-    const fetchProducts = async () => {
-      try {
-        const response = await fetch('https://sugartran.000webhostapp.com/api/ProductResponse.json');
-        const data = await response.json();
-        setProducts(data.data);
-      } catch (error) {
-        console.error('Error fetching products:', error);
-      }
-    };
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch('https://testdeploy.up.railway.app/api/v1/category/?timeRange=2024-06-01T01%3A45%3A45.163Z&timeRange=2024-09-01T01%3A45%3A45.163Z&sort=createdAt&current=0&pageSize=100');
+      const data = await response.json();
+      setCategories(data.data);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
 
-    const fetchSubCategories = async () => {
-      try {
-        const response = await fetch('https://sugartran.000webhostapp.com/api/SubCategoriesResponse.json');
-        const data = await response.json();
-        setSubCategories(data.data);
-      } catch (error) {
-        console.error('Error fetching subcategories:', error);
-      }
-    };
+  const fetchProducts = async (page) => {
+    try {
+      const response = await fetch(
+        `https://testdeploy.up.railway.app/api/v1/products?timeRange=2024-06-01T01:45:45.163Z&timeRange=2024-10-01T01:45:45.163Z&sort=createdAt&current=${page}&pageSize=12`
+      );
+      const data = await response.json();
+      setProducts(data.data);
+      setTotalProducts(data.total); 
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    }
+  };
 
+  const fetchSubCategories = async () => {
+    try {
+      const response = await fetch('https://testdeploy.up.railway.app/api/v1/sub/category/?timeRange=2024-06-01T01%3A45%3A45.163Z&timeRange=2024-09-01T01%3A45%3A45.163Z&sort=createdAt&current=0&pageSize=100');
+      const data = await response.json();
+      setSubCategories(data.data);
+    } catch (error) {
+      console.error('Error fetching subcategories:', error);
+    }
+  };  
+
+  useEffect(() => { 
     fetchCategories();
-    fetchProducts();
+    fetchProducts(0);
     fetchSubCategories();
   }, []);
 
@@ -89,6 +95,12 @@ const Shop = () => {
     setNotification(`Added "${product.productName}" to Cart`); // Set the notification message
     setTimeout(() => setNotification(null), 2000); // Clear the notification after 3 seconds
   };
+
+  useEffect(() => {
+    fetchProducts(currentPage);
+  }, [currentPage]);
+
+  const totalPages = Math.ceil(totalProducts / 12); 
 
   return (
     <div className="relative flex flex-col md:flex-row mx-auto min-w-[375px] max-w-[1600px]">
@@ -205,7 +217,7 @@ const Shop = () => {
               />
               <div className="flex-grow">
                 <h3 className="text-lg font-semibold mb-2">{product.productName}</h3>
-                <p className="text-gray-600">${product.productPrice}</p>
+                <p className="text-gray-600">{product.productPrice} VND</p>
               </div>
               <div className="flex justify-between mt-2">
                 <button
@@ -222,6 +234,23 @@ const Shop = () => {
               </div>
             </div>
           ))}
+        </div>
+        <div className="flex justify-center space-x-4 mt-8">
+          <button
+            className="btn btn-outline"
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 0))}
+            disabled={currentPage === 0}
+          >
+            Previous
+          </button>
+          <div className="mt-2"><span className="text-lg">{currentPage + 1} / {totalPages}</span></div>
+          <button
+            className="btn btn-outline"
+            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages - 1))}
+            disabled={currentPage >= totalPages - 1}
+          >
+            Next
+          </button>
         </div>
       </div>
     </div>
