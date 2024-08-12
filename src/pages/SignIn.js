@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const SignIn = () => {
-  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [formData, setFormData] = useState({ userPhoneNumber: '', userPassword: '' });
   const { signIn } = useAuth();
   const navigate = useNavigate();
 
@@ -15,7 +15,7 @@ const SignIn = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await signIn(formData.email, formData.password);
+      await signIn(formData.userPhoneNumber, formData.userPassword);
       navigate('/');
     } catch (error) {
       console.error('Failed to sign in', error);
@@ -28,11 +28,11 @@ const SignIn = () => {
         <h2 className="text-2xl font-bold text-center">Sign In</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-gray-700">Email</label>
+            <label className="block text-gray-700">Phone</label>
             <input
-              type="email"
-              name="email"
-              value={formData.email}
+              type="text"
+              name="userPhoneNumber"
+              value={formData.userPhoneNumber}
               onChange={handleChange}
               required
               className="w-full p-2 border rounded"
@@ -42,8 +42,8 @@ const SignIn = () => {
             <label className="block text-gray-700">Password</label>
             <input
               type="password"
-              name="password"
-              value={formData.password}
+              name="userPassword"
+              value={formData.userPassword}
               onChange={handleChange}
               required
               className="w-full p-2 border rounded"
