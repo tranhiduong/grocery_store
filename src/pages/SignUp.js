@@ -36,7 +36,6 @@ const SignUp = () => {
       });
       const result = await response.json();
       console.log(result);
-      debugger;
       if (!response.ok) {
         setSignUpFailedContent(result.message);
         setIsModalOpen(true);

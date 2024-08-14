@@ -1,31 +1,66 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 
-const AccountInformation = ({ user }) => {
-  // Initialize form data from user props
+const AccountInformation = () => {
+  const { currentUser } = useAuth();
   const [formData, setFormData] = useState({
-    email: 'user@example.com',
-    phone: '123-456-7890',
-    name: 'John Doe',
-    address: '123 Main St',
-    dob: '1990-01-01'
+    userPhoneNumber: '',
+    userFullName: '',
+    userAddress: '',
+    userDateOfBirth: ''
   });
 
-  // Handle input changes
+  // Update form data if currentUser changes
+  useEffect(() => {
+    if(currentUser){
+      setFormData({
+        userPhoneNumber: currentUser.phone || '',
+        userFullName: currentUser.fullName || '',
+        userAddress: currentUser.address || '',
+        userDateOfBirth: currentUser.dateOfBirth || ''
+      });
+    }
+    
+  }, [currentUser]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Perform form submission logic here, e.g., API call
-    console.log('Form data submitted:', formData);
+    const payload = {
+      ...formData
+    };
+    console.log('Form data submitted:', payload);
+
+    // try {
+    //   const response = await fetch('https://testdeploy.up.railway.app/api/v1/user/update', {
+    //     method: 'POST',
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //       'Authorization': `Bearer ${currentUser.token}`
+    //     },
+    //     body: JSON.stringify(payload)
+    //   });
+
+    //   if (!response.ok) {
+    //     throw new Error('Failed to update account information');
+    //   }
+
+    //   const result = await response.json();
+    //   console.log('Account information updated successfully:', result);
+
+    //   // Optionally show success message or redirect
+    // } catch (error) {
+    //   console.error('Error updating account information:', error);
+    // }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
+      {/* <div>
         <label className="block text-gray-700">Email</label>
         <input
           type="email"
@@ -34,13 +69,13 @@ const AccountInformation = ({ user }) => {
           readOnly
           className="w-full p-2 border rounded bg-gray-100"
         />
-      </div>
+      </div> */}
       <div>
         <label className="block text-gray-700">Phone</label>
         <input
           type="text"
-          name="phone"
-          value={formData.phone}
+          name="userPhoneNumber"
+          value={formData.userPhoneNumber}
           readOnly
           className="w-full p-2 border rounded bg-gray-100"
         />
@@ -49,8 +84,8 @@ const AccountInformation = ({ user }) => {
         <label className="block text-gray-700">Name</label>
         <input
           type="text"
-          name="name"
-          value={formData.name}
+          name="userFullName"
+          value={formData.userFullName}
           onChange={handleChange}
           className="w-full p-2 border rounded"
         />
@@ -59,8 +94,8 @@ const AccountInformation = ({ user }) => {
         <label className="block text-gray-700">Address</label>
         <input
           type="text"
-          name="address"
-          value={formData.address}
+          name="userAddress"
+          value={formData.userAddress}
           onChange={handleChange}
           className="w-full p-2 border rounded"
         />
@@ -69,8 +104,8 @@ const AccountInformation = ({ user }) => {
         <label className="block text-gray-700">Date of Birth</label>
         <input
           type="date"
-          name="dob"
-          value={formData.dob}
+          name="userDateOfBirth"
+          value={formData.userDateOfBirth}
           onChange={handleChange}
           className="w-full p-2 border rounded"
         />

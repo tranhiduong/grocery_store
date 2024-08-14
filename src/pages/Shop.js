@@ -213,6 +213,7 @@ const Shop = () => {
               <img
                 src={product.productThumbnail}
                 alt={product.productName}
+                onError={(e) => e.target.src = '/no-image.jpg'}
                 className="w-full h-48 object-contain mb-2"
               />
               <div className="flex-grow">

@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 const SignIn = () => {
   const [formData, setFormData] = useState({ userPhoneNumber: '', userPassword: '' });
   const { signIn } = useAuth();
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -15,10 +16,16 @@ const SignIn = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await signIn(formData.userPhoneNumber, formData.userPassword);
-      navigate('/');
+      const result = await signIn(formData.userPhoneNumber, formData.userPassword);
+      if(result === true){
+        navigate('/');
+      }else{
+        setIsModalOpen(true);
+      }
+      
     } catch (error) {
       console.error('Failed to sign in', error);
+      setIsModalOpen(true);
     }
   };
 
@@ -56,6 +63,26 @@ const SignIn = () => {
           <Link to="/signup" className="text-blue-500 hover:underline">Sign Up</Link>
         </div>
       </div>
+      {isModalOpen && (
+        <div className="modal modal-open">
+          <div className="modal-box">
+            <h3 className="font-bold text-lg">
+              Sign In Failed
+            </h3>
+            <p className="py-4">
+            Please Check Phone and Password.
+            </p>
+            <div className="modal-action">
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="btn btn-primary"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

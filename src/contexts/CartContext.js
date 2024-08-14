@@ -20,6 +20,8 @@ const cartReducer = (state, action) => {
       }
       case 'REMOVE_ITEM':
         return state.filter(item => item.idProduct !== action.payload.idProduct);
+      case 'CLEAR_CART':
+        return [];
       case 'UPDATE_QUANTITY':
         return state.map(item =>
           item.idProduct === action.payload.idProduct
@@ -32,8 +34,6 @@ const cartReducer = (state, action) => {
         return state;
     }
 };
-  
-
 
 export const CartProvider = ({ children }) => {
   const [cart, dispatch] = useReducer(cartReducer, []);
@@ -44,7 +44,9 @@ export const CartProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cart));
+    if (cart.length > 0) {
+      localStorage.setItem('cart', JSON.stringify(cart));
+    }
   }, [cart]);
 
   return (

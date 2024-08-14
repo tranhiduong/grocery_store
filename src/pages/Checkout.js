@@ -1,22 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCart } from '../contexts/CartContext';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 const Checkout = () => {
-  const { cart, clearCart } = useCart(); // Assuming clearCart is available to clear the cart after order placement
+  const { cart, dispatch } = useCart();
   const navigate = useNavigate();
-  
+  const { currentUser } = useAuth();
+
   const getTotalPrice = () => {
     return cart.reduce((total, item) => total + item.productPrice * item.quantity, 0);
   };
+
+  const clearCart = () => {
+    dispatch({ type: 'CLEAR_CART' });
+  }
 
   const shippingFee = 10000; // Example shipping fee
   const totalPriceWithShipping = getTotalPrice() + shippingFee;
 
   const [formData, setFormData] = useState({
     idUser: 0,
-    statusCode: 'processing',
-    statusName: 'processing',
+    statusCode: '',
+    statusName: '',
     orderName: '',
     orderEmail: '',
     orderPhoneNumber: '',
@@ -31,6 +37,28 @@ const Checkout = () => {
     orderPaymentStatus: 'AwaitingPayment',
   });
 
+  useEffect(()=>{
+    if(currentUser){
+      setFormData({
+        idUser: currentUser.id,
+        statusCode: 'processing',
+        statusName: 'processing',
+        orderName: currentUser.fullName,
+        orderEmail: '',
+        orderPhoneNumber: currentUser.phone,
+        orderAddress: currentUser.address,
+        orderNote: '',
+        orderDate: new Date().toISOString(),
+        orderTotalPrice: totalPriceWithShipping,
+        orderShippingMethod: 'GHN',
+        orderShippingDate: new Date().toISOString(),
+        orderTrackingNumber: '123',
+        orderPaymentMethod: 'CreditCard',
+        orderPaymentStatus: 'AwaitingPayment',
+      });
+    }
+  },[currentUser]);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isOrderSuccess, setIsOrderSuccess] = useState(false);
 
@@ -42,9 +70,8 @@ const Checkout = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const payload = {
-      ...formData
-    };
+    const payload = { ...formData };
+    console.log('Payload:', payload);
 
     try {
       const response = await fetch('https://testdeploy.up.railway.app/api/v1/order', {
@@ -57,16 +84,13 @@ const Checkout = () => {
 
       if (!response.ok) {
         throw new Error('Failed to place order');
+      }else{
+        setIsOrderSuccess(true);
+        setIsModalOpen(true);
       }
-
-      const result = await response.json();
-      console.log('Order placed successfully:', result);
-      setIsOrderSuccess(true);
-      clearCart(); // Clear the cart after successful order
     } catch (error) {
       console.error('Error placing order:', error);
       setIsOrderSuccess(false);
-    } finally {
       setIsModalOpen(true);
     }
   };
@@ -74,7 +98,8 @@ const Checkout = () => {
   const handleModalClose = () => {
     setIsModalOpen(false);
     if (isOrderSuccess) {
-      navigate('/shop'); // Redirect to shop page after successful order
+      navigate('/shop');
+      clearCart();
     }
   };
 
@@ -95,6 +120,7 @@ const Checkout = () => {
       <div className="w-full md:w-1/2 p-8 bg-gray-100 overflow-y-auto">
         <h2 className="text-2xl font-semibold mb-6">Shipping Information</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Form fields */}
           <div>
             <label className="block text-gray-700">Name*</label>
             <input
@@ -219,8 +245,8 @@ const Checkout = () => {
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="modal modal-open">
-          <div className="modal-box">
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded shadow-lg max-w-sm w-full">
             <h3 className="font-bold text-lg">
               {isOrderSuccess ? 'Order Success' : 'Order Failed'}
             </h3>
@@ -229,10 +255,10 @@ const Checkout = () => {
                 ? 'Your order has been placed successfully!'
                 : 'There was an error placing your order. Please try again.'}
             </p>
-            <div className="modal-action">
+            <div className="flex justify-end">
               <button
                 onClick={handleModalClose}
-                className="btn btn-primary"
+                className="btn btn-primary px-4 py-2 rounded-md text-white"
               >
                 OK
               </button>

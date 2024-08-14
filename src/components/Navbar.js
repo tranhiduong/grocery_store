@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaUser, FaShoppingCart, FaSearch, FaSignOutAlt, FaCaretDown, FaCaretRight } from 'react-icons/fa';
+import { FaUser, FaShoppingCart, FaSearch, FaSignOutAlt } from 'react-icons/fa';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import Cart from '../components/Cart';
@@ -22,7 +22,7 @@ const Navbar = () => {
       <nav className="bg-gray-800">
         <div className="text-white p-4 flex justify-between items-center mx-auto min-w-[375px] max-w-[1600px]">
           <div className="flex items-center">
-            <img src="/logo.png" alt="Logo" className="h-8 mr-2" />
+            <img src="/logo.jpg" alt="Logo" className="h-8 mr-2" />
           </div>
           <div className="flex items-center w-full md:w-3/5">
             <div className="relative w-full">
