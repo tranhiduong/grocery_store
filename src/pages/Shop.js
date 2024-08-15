@@ -12,9 +12,9 @@ const Shop = () => {
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
-  const [notification, setNotification] = useState(null); // State for managing notifications
+  const [notification, setNotification] = useState(null);
   const { dispatch } = useCart();
-  const [currentPage, setCurrentPage] = useState(0); // Tracks the current page
+  const [currentPage, setCurrentPage] = useState(0);
   const [totalProducts, setTotalProducts] = useState(0); 
 
 
@@ -90,10 +90,10 @@ const Shop = () => {
   const addToCart = (product) => {
     dispatch({
       type: 'ADD_ITEM',
-      payload: { ...product, quantity: 1 } // Default quantity to 1
+      payload: { ...product, quantity: 1 }
     });
-    setNotification(`Added "${product.productName}" to Cart`); // Set the notification message
-    setTimeout(() => setNotification(null), 2000); // Clear the notification after 3 seconds
+    setNotification(`Added "${product.productName}" to Cart`);
+    setTimeout(() => setNotification(null), 2000);
   };
 
   useEffect(() => {

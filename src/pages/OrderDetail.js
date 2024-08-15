@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import moment from 'moment';
 
 const OrderDetail = () => {
-  const { orderId } = useParams(); // Get the order ID from the URL parameters
+  const { orderId } = useParams();
   const [order, setOrder] = useState(null);
   const [orderDetails, setOrderDetails] = useState([]);
   const [loading, setLoading] = useState(true);

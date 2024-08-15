@@ -9,8 +9,8 @@ const OrderList = () => {
   const [orders, setOrders] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [statusFilter, setStatusFilter] = useState('SHIPPING'); // Default status filter
-  const pageSize = 7; // Number of orders per page
+  const [statusFilter, setStatusFilter] = useState('SHIPPING');
+  const pageSize = 7;
 
   const fetchOrders = async (page = 1) => {
     try {
@@ -19,7 +19,6 @@ const OrderList = () => {
       );
       const data = await response.json();
       setOrders(data.data);
-      // Calculate total pages based on total number of orders and pageSize
       const totalPages = Math.ceil(data.total / pageSize);
       setTotalPages(totalPages);
     } catch (error) {

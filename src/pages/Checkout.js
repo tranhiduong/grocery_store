@@ -16,7 +16,7 @@ const Checkout = () => {
     dispatch({ type: 'CLEAR_CART' });
   }
 
-  const shippingFee = 10000; // Example shipping fee
+  const shippingFee = 10000;
   const totalPriceWithShipping = getTotalPrice() + shippingFee;
 
   const [formData, setFormData] = useState({
