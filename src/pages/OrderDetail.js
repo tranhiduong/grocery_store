@@ -1,37 +1,88 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import moment from 'moment';
 
 const OrderDetail = () => {
-  // Example data
-  const order = {
-    id: '12345',
-    date: '2024-08-05',
-    status: 'Shipped',
-    items: [
-      {
-        id: '1',
-        name: 'Product 1',
-        price: 29.99,
-        quantity: 2,
-        thumbnail: 'https://store.storeimages.cdn-apple.com/8756/as-images.apple.com/is/iphone-card-40-iphone15prohero-202309_FMT_WHH?wid=508&hei=472&fmt=p-jpg&qlt=95&.v=1693086369818'
-      },
-      {
-        id: '2',
-        name: 'Product 2',
-        price: 49.99,
-        quantity: 1,
-        thumbnail: 'https://store.storeimages.cdn-apple.com/8756/as-images.apple.com/is/iphone-card-40-iphone15prohero-202309_FMT_WHH?wid=508&hei=472&fmt=p-jpg&qlt=95&.v=1693086369818'
+  const { orderId } = useParams(); // Get the order ID from the URL parameters
+  const [order, setOrder] = useState(null);
+  const [orderDetails, setOrderDetails] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchOrderData = async () => {
+      try {
+        const response = await fetch(`https://testdeploy.up.railway.app/api/v1/order/${orderId}`);
+        const result = await response.json();
+
+        if (result.code === 200) {
+          const apiOrder = result.data;
+          setOrder({
+            id: apiOrder.idOrder,
+            date: apiOrder.orderDate,
+            status: apiOrder.statusCode,
+            name: apiOrder.orderName,
+            email: apiOrder.orderEmail,
+            phoneNumber: apiOrder.orderPhoneNumber,
+            address: apiOrder.orderAddress,
+            note: apiOrder.orderNote,
+            shippingMethod: apiOrder.orderShippingMethod,
+            paymentMethod: apiOrder.orderPaymentMethod,
+            totalPrice: apiOrder.orderTotalPrice
+          });
+        } else {
+          setError('Failed to fetch order details.');
+        }
+      } catch (error) {
+        setError('An error occurred while fetching order details.');
       }
-    ],
-    shippingFee: 10.00,
+    };
+
+    const fetchOrderDetails = async () => {
+      try {
+        const response = await fetch(`https://testdeploy.up.railway.app/api/v1/order/detail/by-order/${orderId}?sort=createdAt&current=0&pageSize=100`);
+        const result = await response.json();
+
+        if (result.success) {
+          setOrderDetails(result.data);
+        } else {
+          setError('Failed to fetch order details.');
+        }
+      } catch (error) {
+        setError('An error occurred while fetching order details.');
+      }
+    };
+
+    const fetchData = async () => {
+      await Promise.all([fetchOrderData(), fetchOrderDetails()]);
+      setLoading(false);
+    };
+
+    fetchData();
+  }, [orderId]);
+
+  const getStatusName = (status) => {
+    switch (status) {
+      case 'SHIPPING':
+        return 'Shipping';
+      case 'SUCCEEDED':
+        return 'Succeeded';
+      default:
+        return 'Unknown';
+    }
   };
 
-  // Calculate total price
-  const getTotalPrice = () => {
-    return order.items.reduce((total, item) => total + item.price * item.quantity, 0);
-  };
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
-  const totalPriceWithShipping = getTotalPrice() + order.shippingFee;
+  if (error) {
+    return <div>{error}</div>;
+  }
+
+  if (!order) {
+    return <div>No order found.</div>;
+  }
 
   return (
     <div className="flex flex-col md:flex-row mx-auto min-w-[375px] max-w-[1600px] md:max-h-[calc(100vh-72px-1.5rem)]">
@@ -39,16 +90,46 @@ const OrderDetail = () => {
       <div className="w-full md:w-1/2 p-8 bg-gray-100 overflow-y-auto">
         <h2 className="text-2xl font-semibold mb-6">Order Details</h2>
         <div className="mb-4">
-          <p className="text-lg font-semibold">Order ID:</p>
-          <p className="text-gray-700">{order.id}</p>
-        </div>
-        <div className="mb-4">
-          <p className="text-lg font-semibold">Order Date:</p>
-          <p className="text-gray-700">{order.date}</p>
-        </div>
-        <div className="mb-4">
-          <p className="text-lg font-semibold">Status:</p>
-          <p className="text-gray-700">{order.status}</p>
+          <div className="flex items-center mb-2">
+            <p className="text-lg font-semibold w-1/3">Order ID:</p>
+            <p className="text-gray-700 w-2/3">{order.id}</p>
+          </div>
+          <div className="flex items-center mb-2">
+            <p className="text-lg font-semibold w-1/3">Order Date:</p>
+            <p className="text-gray-700 w-2/3">{moment(order.date).format('DD/MM/YYYY')}</p>
+          </div>
+          <div className="flex items-center mb-2">
+            <p className="text-lg font-semibold w-1/3">Status:</p>
+            <p className="text-gray-700 w-2/3">{getStatusName(order.status)}</p>
+          </div>
+          <div className="flex items-center mb-2">
+            <p className="text-lg font-semibold w-1/3">Order Name:</p>
+            <p className="text-gray-700 w-2/3">{order.name}</p>
+          </div>
+          <div className="flex items-center mb-2">
+            <p className="text-lg font-semibold w-1/3">Order Email:</p>
+            <p className="text-gray-700 w-2/3">{order.email}</p>
+          </div>
+          <div className="flex items-center mb-2">
+            <p className="text-lg font-semibold w-1/3">Order Phone Number:</p>
+            <p className="text-gray-700 w-2/3">{order.phoneNumber}</p>
+          </div>
+          <div className="flex items-center mb-2">
+            <p className="text-lg font-semibold w-1/3">Order Address:</p>
+            <p className="text-gray-700 w-2/3">{order.address}</p>
+          </div>
+          <div className="flex items-center mb-2">
+            <p className="text-lg font-semibold w-1/3">Order Note:</p>
+            <p className="text-gray-700 w-2/3">{order.note || 'N/A'}</p>
+          </div>
+          <div className="flex items-center mb-2">
+            <p className="text-lg font-semibold w-1/3">Shipping Method:</p>
+            <p className="text-gray-700 w-2/3">{order.shippingMethod}</p>
+          </div>
+          <div className="flex items-center mb-2">
+            <p className="text-lg font-semibold w-1/3">Payment Method:</p>
+            <p className="text-gray-700 w-2/3">{order.paymentMethod}</p>
+          </div>
         </div>
         <div className="mt-6 relative bottom-0">
           <Link to="/account" className="btn btn-neutral px-4 py-2 rounded-md text-white">
@@ -61,31 +142,21 @@ const OrderDetail = () => {
       <div className="w-full md:w-1/2 p-8 flex-grow overflow-y-auto">
         <h2 className="text-2xl font-semibold mb-6">Order Summary</h2>
         <ul className="space-y-4 max-h-[400px] overflow-y-auto">
-          {order.items.map((item) => (
-            <li key={item.id} className="flex items-center justify-between">
+          {orderDetails.map((item) => (
+            <li key={item.idOrderDetail} className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-semibold">{item.name}</h3>
+                <h3 className="text-lg font-semibold">Product ID: {item.idProduct}</h3>
                 <p className="text-gray-600">
-                  ${item.price.toFixed(2)} x {item.quantity}
+                  {item.orderDetailPrice} VND x {item.orderDetailQuantity}
                 </p>
               </div>
-              <img
-                src={item.thumbnail}
-                alt={item.name}
-                className="w-24 h-24 object-cover"
-              />
+              <p className="text-gray-700">{item.orderDetailTotalPrice} VND</p>
             </li>
           ))}
         </ul>
         <div className="border-t mt-4 pt-4">
-          <p className="text-lg">
-            <span className="font-semibold">Subtotal:</span> ${getTotalPrice().toFixed(2)}
-          </p>
-          <p className="text-lg">
-            <span className="font-semibold">Shipping Fee:</span> ${order.shippingFee.toFixed(2)}
-          </p>
           <p className="text-xl font-semibold mt-2">
-            <span>Total:</span> ${totalPriceWithShipping.toFixed(2)}
+            <span>Total:</span> {order.totalPrice} VND
           </p>
         </div>     
       </div>

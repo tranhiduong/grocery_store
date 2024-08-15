@@ -66,6 +66,7 @@ const Cart = ({ isOpen, onClose }) => {
                 <img
                   src={item.productThumbnail}
                   alt={item.productName}
+                  onError={(e) => e.target.src = '/no-image.jpg'}
                   className="w-24 h-24 object-cover mr-4"
                 />
                 <div className="flex-grow">

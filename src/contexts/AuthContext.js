@@ -59,8 +59,21 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('currentUser');
   };
 
+  const setUser = (data) =>{
+    const user = {
+      phone: data.userPhoneNumber,
+      jwtToken: data.jwtToken,
+      fullName: data.userFullName,
+      address: data.userAddress,
+      dateOfBirth: data.userDateOfBirth,
+      id: data.idUser,
+    };
+    setCurrentUser(user);
+    localStorage.setItem('currentUser', JSON.stringify(user));
+  };
+
   return (
-    <AuthContext.Provider value={{ currentUser, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ currentUser, setUser, signIn, signUp, signOut }}>
       {children}
     </AuthContext.Provider>
   );

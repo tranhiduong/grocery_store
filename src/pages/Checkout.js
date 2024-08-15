@@ -32,8 +32,8 @@ const Checkout = () => {
     orderTotalPrice: totalPriceWithShipping,
     orderShippingMethod: 'GHN',
     orderShippingDate: new Date().toISOString(),
-    orderTrackingNumber: '123',
-    orderPaymentMethod: 'CreditCard',
+    orderTrackingNumber: '',
+    orderPaymentMethod: 'Cash',
     orderPaymentStatus: 'AwaitingPayment',
   });
 
@@ -41,8 +41,8 @@ const Checkout = () => {
     if(currentUser){
       setFormData({
         idUser: currentUser.id,
-        statusCode: 'processing',
-        statusName: 'processing',
+        statusCode: 'SHIPPING',
+        statusName: 'Đang giao hàng',
         orderName: currentUser.fullName,
         orderEmail: '',
         orderPhoneNumber: currentUser.phone,
@@ -52,8 +52,8 @@ const Checkout = () => {
         orderTotalPrice: totalPriceWithShipping,
         orderShippingMethod: 'GHN',
         orderShippingDate: new Date().toISOString(),
-        orderTrackingNumber: '123',
-        orderPaymentMethod: 'CreditCard',
+        orderTrackingNumber: '',
+        orderPaymentMethod: 'Cash',
         orderPaymentStatus: 'AwaitingPayment',
       });
     }
@@ -83,16 +83,48 @@ const Checkout = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to place order');
+        setIsOrderSuccess(false);
+        setIsModalOpen(true);
       }else{
         setIsOrderSuccess(true);
         setIsModalOpen(true);
+        const result = await response.json();
+        const orderId = result.data.idOrder;
+        cart.forEach(async (item) =>  {
+          const payloadOrderDetail = { 
+            "idOrder": orderId,
+            "idProduct": item.idProduct,
+            "statusCode": "",
+            "statusName": "",
+            "orderDetailQuantity": item.quantity,
+            "orderDetailPrice": item.productPrice,
+            "orderDetailTotalPrice": item.quantity * item.productPrice,
+            "orderDetailColor": ""
+           };
+          try {
+            const response = await fetch('https://testdeploy.up.railway.app/api/v1/order/detail', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(payloadOrderDetail),
+            });
+            if (!response.ok) {
+              const resultOrderDetail = await response.json();
+              console.log("Save Detail Failed:", resultOrderDetail.message);
+            }
+          }catch(error){
+            console.log("Save Detail Failed:", error);
+          }
+        });
       }
     } catch (error) {
       console.error('Error placing order:', error);
       setIsOrderSuccess(false);
       setIsModalOpen(true);
     }
+
+    
   };
 
   const handleModalClose = () => {
@@ -225,6 +257,7 @@ const Checkout = () => {
               <img
                 src={item.productThumbnail}
                 alt={item.productName}
+                onError={(e) => e.target.src = '/no-image.jpg'}
                 className="w-24 h-24 object-cover"
               />
             </li>

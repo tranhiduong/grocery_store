@@ -20,6 +20,7 @@ import { AuthProvider } from './contexts/AuthContext';
 function App() {
   return (
     <div className="App">
+      <script src="https://js.stripe.com/v3/"></script>
       <CartProvider>
         <AuthProvider>
           <BrowserRouter>
